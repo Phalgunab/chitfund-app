@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChitFund Pro - Mobile App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .phone-container {
+            width: 375px;
+            height: 812px;
+            background: #000;
+            border-radius: 40px;
+            padding: 8px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .screen {
+            width: 100%;
+            height: 100%;
+            background: #f8fafc;
+            border-radius: 32px;
+            position: relative;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 24px;
+            background: transparent;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .nav-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 1000;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 400px;
+        }
+        
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .nav-btn.active {
+            background: rgba(255,255,255,0.4);
+            border-color: rgba(255,255,255,0.5);
+        }
+        
+        /* Login Screen */
+        .login-screen {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .login-header {
+            text-align: center;
+            padding: 80px 24px 40px;
+        }
+        
+        .login-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .login-header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .login-form {
+            background: white;
+            margin: 0 24px;
+            border-radius: 24px;
+            padding: 32px 24px;
+            color: #1e293b;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f9fafb;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        }
+        
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 8px;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            width: 100%;
+            background: transparent;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 12px;
+        }
+        
+        .btn-secondary:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        /* Dashboard Screen */
+        .dashboard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 24px;
+            color: white;
+        }
+        
+        .dashboard-header h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .dashboard-header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            padding: 24px;
+            margin-top: -20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 24px;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.12);
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .quick-actions {
+            padding: 0 24px 24px;
+        }
+        
+        .quick-actions h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 16px;
+        }
+        
+        .action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .action-btn {
+            background: white;
+            border: 2px solid #e5e7eb;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #374151;
+        }
+        
+        .action-btn:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+        }
+        
+        .action-btn.manager-only {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .action-btn.manager-only.enabled {
+            opacity: 1;
+            cursor: pointer;
+        }
+        
+        .action-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: #667eea;
+        }
+        
+        .action-text {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        /* Add Member Screen */
+        .add-member-screen {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            color: white;
+        }
+        
+        .add-member-header {
+            padding: 60px 24px 40px;
+            text-align: center;
+        }
+        
+        .add-member-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .member-form {
+            background: white;
+            margin: 0 24px;
+            border-radius: 24px;
+            padding: 32px 24px;
+            color: #1e293b;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        /* Approval Screen */
+        .approval-header {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            padding: 24px;
+            color: white;
+        }
+        
+        .approval-list {
+            padding: 24px;
+        }
+        
+        .approval-item {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .approval-item h4 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        
+        .approval-details {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 16px;
+        }
+        
+        .approval-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn-approve {
+            flex: 1;
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-reject {
+            flex: 1;
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-approve:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+        
+        .btn-reject:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+        
+        /* Payment Methods Screen */
+        .payment-header {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            padding: 24px;
+            color: white;
+        }
+        
+        .payment-methods {
+            padding: 24px;
+        }
+        
+        .payment-section {
+            margin-bottom: 32px;
+        }
+        
+        .payment-section h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 16px;
+        }
+        
+        .payment-method {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .payment-method:hover {
+            border-color: #06b6d4;
+            box-shadow: 0 4px 15px rgba(6, 182, 212, 0.15);
+        }
+        
+        .payment-method.selected {
+            border-color: #06b6d4;
+            background: #f0fdff;
+        }
+        
+        .payment-method-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .payment-icon {
+            font-size: 24px;
+            margin-right: 12px;
+        }
+        
+        .payment-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .payment-details {
+            font-size: 14px;
+            color: #64748b;
+            margin-left: 36px;
+        }
+        
+        .add-payment-btn {
+            background: #06b6d4;
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 16px;
+        }
+        
+        .add-payment-btn:hover {
+            background: #0891b2;
+            transform: translateY(-2px);
+        }
+        
+        /* Fund Manager Screen */
+        .fund-header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            padding: 24px;
+            color: white;
+        }
+        
+        .fund-summary {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 16px;
+        }
+        
+        .fund-summary h3 {
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+        
+        .fund-stats {
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .fund-stat {
+            text-align: center;
+        }
+        
+        .fund-stat-value {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        
+        .fund-stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-top: 4px;
+        }
+        
+        .fund-list {
+            padding: 24px;
+        }
+        
+        .fund-item {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border-left: 4px solid #10b981;
+        }
+        
+        .fund-item h4 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        
+        .fund-details {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: #64748b;
+        }
+        
+        .fund-amount {
+            font-weight: 600;
+            color: #10b981;
+        }
+        
+        /* Customer Screen */
+        .customer-header {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            padding: 24px;
+            color: white;
+        }
+        
+        .customer-profile {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            margin-top: 16px;
+            text-align: center;
+        }
+        
+        .customer-avatar {
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 700;
+        }
+        
+        .customer-info {
+            padding: 24px;
+        }
+        
+        .info-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        
+        .info-card h4 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            font-size: 14px;
+            color: #64748b;
+        }
+        
+        .info-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-active {
+            background: #dcfce7;
+            color: #166534;
+        }
+        
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .floating-action {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .floating-action:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+        }
+        
+        .role-indicator {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <!-- Login Screen -->
+        <div class="screen login-screen active" id="login">
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>📶 📶 📶 🔋</span>
+            </div>
+            
+            <div class="login-header">
+                <h1>Welcome Back</h1>
+                <p>Sign in to ChitFund Pro</p>
+            </div>
+            
+            <div class="login-form">
+                <div class="form-group">
+                    <label>Email or Phone</label>
+                    <input type="text" placeholder="Enter email or phone number" id="loginEmail">
+                </div>
+                
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" placeholder="Enter your password" id="loginPassword">
+                </div>
+                
+                <button class="btn-primary" onclick="login()">Sign In</button>
+                <button class="btn-secondary" onclick="showScreen('registration')">Create New Account</button>
+            </div>
+        </div>
+        
+        <!-- Registration Screen -->
+        <div class="screen registration-screen" id="registration">
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>📶 📶 📶 🔋</span>
+            </div>
+            
+            <div class="reg-header">
+                <h1>ChitFund Pro</h1>
+                <p>Smart Chit Fund Management</p>
+            </div>
+            
+            <div class="reg-form">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" placeholder="Enter your full name">
+                </div>
+                
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="tel" placeholder="+91 98765 43210">
+                </div>
+                
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" placeholder="john@example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label>User Type</label>
+                    <select id="userTypeSelect">
+                        <option value="">Select user type</option>
+                        <option value="manager">Fund Manager</option>
+                        <option value="customer">Customer</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Create Password</label>
+                    <input type="password" placeholder="Create a strong password">
+                </div>
+                
+                <button class="btn-primary" onclick="register()">Create Account</button>
+            </div>
+        </div>
+        
+        <!-- Dashboard Screen -->
+        <div class="screen" id="dashboard">
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>📶 📶 📶 🔋</span>
+            </div>
+            
+            <div class="role-indicator" id="roleIndicator">Manager</div>
+            
+            <div class="dashboard-header">
+                <h2>Dashboard</h2>
+                <p>Welcome back, <span id="userName">John Doe</span></p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">₹2.5L</div>
+                    <div class="stat-label">Total Funds</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">Active Schemes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">48</div>
+                    <div class="stat-label">Members</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">₹15K</div>
+                    <div class="stat-label">This Month</div>
+                </div>
+            </div>
+            
+            <div class="quick-actions">
+                <h3>Quick Actions</h3>
+                <div class="action-grid">
+                    <div class="action-btn">
+                        <div class="action-icon">💰</div>
+                        <div class="action-text">New Fund</div>
+                    </div>
+                    <div class="action-btn manager-only" id="addMemberBtn" onclick="showAddMember()">
+                        <div class="action-icon">👥</div>
+                        <div class="action-text">Add Member</div>
+                    </div>
+                    <div class="action-btn">
+                        <div class="action-icon">📊</div>
+                        <div class="action-text">Reports</div>
+                    </div>
+                    <div class="action-btn" onclick="showScreen('payment')">
+                        <div class="action-icon">💳</div>
+                        <div class="action-text">Payments</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="floating-action">+</div>
+        </div>
+        
+        <!-- Add Member Screen -->
+        <div class="screen add-member-screen" id="addMember">
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>📶 📶 📶 🔋</span>
+            </div>
+            
+            <div class="add-member-header">
+                <h1>Add New Member</h1>
+                <p>Add a member to your chit fund</p>
+            </div>
+            
+            <div class="member-form">
+                <div class="form-group">
+                    <label>Member Name</label>
+                    <input type="text" placeholder="Enter member's full name">
+                </div>
+                
+                <div class="form-group">
+                    <label>Mobile Number</label>
+                    <input type="tel" placeholder="+91 98765 43210">
+                </div>
+                
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" placeholder="member@example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label>Select Fund</label>
+                    <select>
+                        <option>Choose a fund</option>
+                        <option>Gold Scheme - Series A</option>
+                        <option>Business Growth Fund</option>
+                        <option>Emergency Relief Fund</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Monthly Contribution</label>
+                    <input type="number" placeholder="Enter amount">
+                </div>
+                
+                <button class="btn-primary">Add Member</button>
+            </div>
+        </div>
+        
+        <!-- Approval Screen -->
+        <div class="screen" id="approval">
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>📶 📶 📶 🔋</span>
+            </div>
+            
+            <div class="approval-header">
+                <h2>Member Approvals</h2>
+                <p>Review new member requests</p>
+            </div>
+            
+            <div class="approval-list">
+                <div class="approval-item">
+                    <h4>Priya Sharma</h4>
+                    <div class="approval-details">
+                        Phone: +91 98765 43210<br>
+                        Email: priya@example.com<br>
+                        Requested Fund: Gold Scheme - Series A<br>
+                        Contribution: ₹5,000/month
+                    </div>
+                    <div class="approval-actions">
+                        <button class="btn-approve" onclick="approveMember(this)">Approve</button>
+                        <button class="btn-reject" onclick="rejectMember(this)">Reject</button>
+                    </div>
+                </div>
+                
+                <div class="approval-item">
+                    <h4>Raj Kumar</h4>
+                    <div class="approval-details">
+                        Phone: +91 87654 32109<br>
+                        Email: raj@example.com<br>
+                        Requested Fund: Business Growth Fund<br>
+                        Contribution: ₹7,500/month
+                    </div>
+                    <div class="approval-actions">
+                        <button class="btn-approve" onclick="approveMember(this)">Approve</button>
+                        <button class="btn-reject" onclick="rejectMember(this)">Reject</button>
+                    </div>
+                </div>
+                
+                <div class="approval-item">
+                    <h4>Anita Desai</h4>
+                    <div class="approval-details">
+                        Phone: +91 76543 21098<br>
+                        Email: anita@example.com<br>
+                        Requested Fund: Emergency Relief Fund<br>
+                        Contribution: ₹3,000/month
+                    </div>
+                    <div class="approval-actions">
+                        <button class="btn-approve" onclick="approveMember(this)">Approve</button>
+                        <button class="btn-reject" onclick="rejectMember(this)">Reject</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Payment Methods Screen -->
+        <div class="screen" id="payment">
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>📶 📶 📶 🔋</span>
+            </div>
+            
+            <div class="payment-header">
+                <h2>Payment Methods</h2>
+                <p>Manage your payment options</p>
+            </div>
+            
+            <div class="payment-methods">
+                <div class="payment-section">
+                    <h3>Saved Payment Methods</h3>
+                    
+                    <div class="payment-method selected" onclick="selectPayment(this)">
+                        <div class="payment-method-header">
+                            <div style="display: flex; align-items: center;">
+                                <span class="payment-icon">💳</span>
+                                <span class="payment-name">HDFC Bank Card</span>
+                            </div>
+                            <span>●●●● 4532</span>
+                        </div>
+                        <div class="payment-details">Expires 12/26</div>
+                    </div>
+                    
+                    <div class="payment-method" onclick="selectPayment(this)">
+                        <div class="payment-method-header">
+                            <div style="display: flex; align-items: center;">
+                                <span class="payment-icon">🏦</span>
+                                <span class="payment-name">UPI - PhonePe</span>
+                            </div>
+                            <span>9876543210@paytm</span>
+                        </div>
+                        <div class="payment-details">Linked to SBI Account</div>
+                    </div>
+                    
+                    <div class="payment-method" onclick="selectPayment(this)">
+                        <div class="payment-method-header">
+                            <div style="display: flex; align-items: center;">
+                                <span class="payment-icon">🏧</span>
+                                <span class="payment-name">Net Banking</span>
+                            </div>
+                            <span>ICICI Bank</span>
+                        </div>
+                        <div class="payment-details">Primary Account ●●●●1234</div>
+                    </div>
+                </div>
+                
+                <div class="payment-section">
+                    <h3>Auto-Pay Settings</h3>
+                    
+                    <div class="payment-method">
+                        <div class="payment-method-header">
+                            <div style="display: flex; align-items: center;">
+                                <span class="payment-icon">🔄</span>
+                                <span class="payment-name">Auto-Pay Enabled</span>
+                            </div>
+                            <div style="display: flex; align-items: center;">
+                                <input type="checkbox" checked style="margin-right: 8px;">
+                                <span style="font-size: 14px; color: #10b981;">ON</span>
+                            </div>
+                        </div>
+                        <div class="payment-details">Monthly payments on 5th of every month</div>
+                    </div>
+                </div>
+                
+                <button class="add-payment-btn">Add New Payment Method</button>
+            </div>
+        </div>
+        
+        <!-- Fund Manager Screen -->
+        <div class="screen" id="manager">
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>📶 📶 📶 🔋</span>
+            </div>
+            
+            <div class="fund-header">
+                <h2>Fund Manager</h2>
+                <p>Manage your chit funds</p>
+                
+                <div class="fund-summary">
+                    <h3>Current Performance</h3>
+                    <div class="fund-stats">
+                        <div class="fund-stat">
+                            <div class="fund-stat-value">₹2.5L</div>
+                            <div class="fund-stat-label">Total Value</div>
+                        </div>
+                        <div class="fund-stat">
+                            <div class="fund-stat-value">95%</div>
+                            <div class="fund-stat-label">Collection Rate</div>
+                        </div>
+                        <div class="fund-stat">
+                            <div class="fund-stat-value">3</div>
+                            <div class="fund-stat-label">Active Funds</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="fund-list">
+                <div class="fund-item">
+                    <h4>Gold Scheme - Series A</h4>
+                    <div class="fund-details">
+                        <span>20 Members</span>
+                        <span class="fund-amount">₹1,00,000</span>
+                    </div>
+                </div>
+                
+                <div class="fund-item">
+                    <h4>Business Growth Fund</h4>
+                    <div class="fund-details">
+                        <span>15 Members</span>
+                        <span class="fund-amount">₹75,000</span>
+                    </div>
+                </div>
+                
+                <div class="fund-item">
+                    <h4>Emergency Relief Fund</h4>
+                    <div class="fund-details">
+                        <span>25 Members</span>
+                        <span class="fund-amount">₹1,25,000</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="floating-action">+</div>
+        </div>
+        
+        <!-- Customer Screen -->
+        <div class="screen" id="customer">
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>📶 📶 📶 🔋</span>
+            </div>
+            
+            <div class="customer-header">
+                <h2>My Profile</h2>
+                <p>Customer Dashboard</p>
+                
+                <div class="customer-profile">
+                    <div class="customer-avatar">JD</div>
+                    <h3>John Doe</h3>
+                    <p>Member since 2023</p>
+                </div>
+            </div>
+            
+            <div class="customer-info">
+                <div class="info-card">
+                    <h4>Account Information</h4>
+                    <div class="info-row">
+                        <span class="info-label">Customer ID</span>
+                        <span class="info-value">CF001234</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Phone</span>
+                        <span class="info-value">+91 98765 43210</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Status</span>
+                        <span class="status-badge status-active">Active</span>
+                    </div>
+                </div>
+                
+                <div class="info-card">
+                    <h4>My Investments</h4>
+                    <div class="info-row">
+                        <span class="info-label">Total Invested</span>
+                        <span class="info-value">₹45,000</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Active Schemes</span>
+                        <span class="info-value">3</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Next Payment</span>
+                        <span class="info-value">₹5,000</span>
+                    </div>
+                </div>
+                
+                <div class="info-card">
+                    <h4>Recent Activity</h4>
+                    <div class="info-row">
+                        <span class="info-label">Last Payment</span>
+                        <span class="info-value">₹5,000 - Jan 15</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Payment Status</span>
+                        <span class="status-badge status-pending">Pending</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="floating-action">💳</div>
+        </div>
+    </div>
+    
+    <div class="nav-controls">
+        <button class="nav-btn active" onclick="showScreen('login')">Login</button>
+        <button class="nav-btn" onclick="showScreen('registration')">Register</button>
+        <button class="nav-btn" onclick="showScreen('dashboard')">Dashboard</button>
+        <button class="nav-btn" onclick="showScreen('manager')">Manager</button>
+        <button class="nav-btn" onclick="showScreen('customer')">Customer</button>
+        <button class="nav-btn" onclick="showScreen('approval')">Approvals</button>
+        <button class="nav-btn" onclick="showScreen('payment')">Payments</button>
+    </div>
+    
+    <script>
+        let currentUserRole = null;
+        let isLoggedIn = false;
+        
+        function showScreen(screenId) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Show selected screen
+            document.getElementById(screenId).classList.add('active');
+            
+            // Update navigation buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update role-based access
+            updateRoleBasedAccess();
+        }
+        
+        function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (email && password) {
+                // Simulate login - in real app, this would validate against backend
+                if (email.includes('manager') || email === 'manager@test.com') {
+                    currentUserRole = 'manager';
+                    document.getElementById('userName').textContent = 'Fund Manager';
+                    document.getElementById('roleIndicator').textContent = 'Manager';
+                } else {
+                    currentUserRole = 'customer';
+                    document.getElementById('userName').textContent = 'Customer';
+                    document.getElementById('roleIndicator').textContent = 'Customer';
+                }
+                
+                isLoggedIn = true;
+                showScreen('dashboard');
+                updateRoleBasedAccess();
+                
+                // Show success animation
+                const loginBtn = document.querySelector('.btn-primary');
+                loginBtn.textContent = 'Welcome!';
+                loginBtn.style.background = '#10b981';
+                
+                setTimeout(() => {
+                    loginBtn.textContent = 'Sign In';
+                    loginBtn.style.background = '';
+                }, 1000);
+            } else {
+                alert('Please enter both email and password');
+            }
+        }
+        
+        function register() {
+            const userType = document.getElementById('userTypeSelect').value;
+            
+            if (userType) {
+                // Show registration success
+                alert('Registration request submitted! Awaiting approval from fund manager.');
+                showScreen('login');
+            } else {
+                alert('Please select a user type');
+            }
+        }
+        
+        function updateRoleBasedAccess() {
+            const addMemberBtn = document.getElementById('addMemberBtn');
+            
+            if (currentUserRole === 'manager') {
+                addMemberBtn.classList.add('enabled');
+                addMemberBtn.style.pointerEvents = 'auto';
+                addMemberBtn.style.opacity = '1';
+            } else {
+                addMemberBtn.classList.remove('enabled');
+                addMemberBtn.style.pointerEvents = 'none';
+                addMemberBtn.style.opacity = '0.5';
+            }
+        }
+        
+        function showAddMember() {
+            if (currentUserRole === 'manager') {
+                showScreen('addMember');
+            } else {
+                alert('Only fund managers can add members');
+            }
+        }
+        
+        function approveMember(button) {
+            const approvalItem = button.closest('.approval-item');
+            const memberName = approvalItem.querySelector('h4').textContent;
+            
+            // Show approval animation
+            button.textContent = 'Approved!';
+            button.style.background = '#10b981';
+            
+            setTimeout(() => {
+                approvalItem.style.transform = 'translateX(100%)';
+                approvalItem.style.opacity = '0';
+                
+                setTimeout(() => {
+                    approvalItem.remove();
+                }, 300);
+            }, 1000);
+            
+            // Show success message
+            setTimeout(() => {
+                alert(`${memberName} has been approved and notified via SMS/Email`);
+            }, 500);
+        }
+        
+        function rejectMember(button) {
+            const approvalItem = button.closest('.approval-item');
+            const memberName = approvalItem.querySelector('h4').textContent;
+            
+            // Show rejection animation
+            button.textContent = 'Rejected';
+            
+            setTimeout(() => {
+                approvalItem.style.transform = 'translateX(-100%)';
+                approvalItem.style.opacity = '0';
+                
+                setTimeout(() => {
+                    approvalItem.remove();
+                }, 300);
+            }, 1000);
+            
+            // Show rejection message
+            setTimeout(() => {
+                alert(`${memberName}'s application has been rejected and they have been notified`);
+            }, 500);
+        }
+        
+        function selectPayment(element) {
+            // Remove selected class from all payment methods
+            document.querySelectorAll('.payment-method.selected').forEach(method => {
+                method.classList.remove('selected');
+            });
+            
+            // Add selected class to clicked element
+            element.classList.add('selected');
+            
+            // Show selection feedback
+            const paymentName = element.querySelector('.payment-name').textContent;
+            
+            // Create and show temporary feedback
+            const feedback = document.createElement('div');
+            feedback.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(6, 182, 212, 0.9);
+                color: white;
+                padding: 16px 24px;
+                border-radius: 12px;
+                font-weight: 600;
+                z-index: 1000;
+                backdrop-filter: blur(10px);
+            `;
+            feedback.textContent = `${paymentName} selected`;
+            document.body.appendChild(feedback);
+            
+            setTimeout(() => {
+                feedback.remove();
+            }, 1500);
+        }
+        
+        // Add some interactivity to form elements
+        document.querySelectorAll('input, select').forEach(element => {
+            element.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'translateY(-2px)';
+            });
+            
+            element.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'translateY(0)';
+            });
+        });
+        
+        // Add click animation to buttons
+        document.querySelectorAll('.btn-primary, .btn-secondary, .action-btn, .floating-action, .add-payment-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set initial state
+            updateRoleBasedAccess();
+        });
+    </script>
+</body>
+</html>
+                
